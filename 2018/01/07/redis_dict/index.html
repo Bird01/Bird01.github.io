@@ -79,13 +79,19 @@
 
 
 
-<meta property="og:type" content="website">
+<meta name="description" content="title: redis_dict​    最近研究了一下redis里面字典的实现，redis作为高效的内存存储而被广泛使用，内部实现的db结构以及多种高效的数据结构，其底层基本上就是靠字典来实现。而其字典数据结构是基于哈希表来实现的，其中一些特性的实现十分精妙。​    源码分析是基于3.2版本的，相关数据结构定义在dict.h/dict.c中。 ###数据结构在看具体的数据结构之前，首先我们来">
+<meta property="og:type" content="article">
 <meta property="og:title" content="Bird&#39;s Note">
-<meta property="og:url" content="http://yoursite.com/index.html">
+<meta property="og:url" content="http://yoursite.com/2018/01/07/redis_dict/index.html">
 <meta property="og:site_name" content="Bird&#39;s Note">
+<meta property="og:description" content="title: redis_dict​    最近研究了一下redis里面字典的实现，redis作为高效的内存存储而被广泛使用，内部实现的db结构以及多种高效的数据结构，其底层基本上就是靠字典来实现。而其字典数据结构是基于哈希表来实现的，其中一些特性的实现十分精妙。​    源码分析是基于3.2版本的，相关数据结构定义在dict.h/dict.c中。 ###数据结构在看具体的数据结构之前，首先我们来">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/Users/apple/Desktop/整体结构.png">
+<meta property="og:updated_time" content="2018-01-07T06:31:34.756Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Bird&#39;s Note">
+<meta name="twitter:description" content="title: redis_dict​    最近研究了一下redis里面字典的实现，redis作为高效的内存存储而被广泛使用，内部实现的db结构以及多种高效的数据结构，其底层基本上就是靠字典来实现。而其字典数据结构是基于哈希表来实现的，其中一些特性的实现十分精妙。​    源码分析是基于3.2版本的，相关数据结构定义在dict.h/dict.c中。 ###数据结构在看具体的数据结构之前，首先我们来">
+<meta name="twitter:image" content="http://yoursite.com/Users/apple/Desktop/整体结构.png">
 
 
 
@@ -115,13 +121,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/01/07/redis_dict/"/>
 
 
 
 
 
-  <title>Bird's Note</title>
+  <title> | Bird's Note</title>
   
 
 
@@ -140,8 +146,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-  page-home">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -234,9 +239,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -266,9 +271,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/01/07/redis_dict/" itemprop="url">未命名</a></h1>
+          <h1 class="post-title" itemprop="name headline"></h1>
         
 
         <div class="post-meta">
@@ -318,9 +321,7 @@
       
 
       
-        
-          
-            <p>title: redis_dict<br>​    最近研究了一下redis里面字典的实现，redis作为高效的内存存储而被广泛使用，内部实现的db结构以及多种高效的数据结构，其底层基本上就是靠字典来实现。而其字典数据结构是基于哈希表来实现的，其中一些特性的实现十分精妙。<br>​    源码分析是基于3.2版本的，相关数据结构定义在dict.h/dict.c中。</p>
+        <p>title: redis_dict<br>​    最近研究了一下redis里面字典的实现，redis作为高效的内存存储而被广泛使用，内部实现的db结构以及多种高效的数据结构，其底层基本上就是靠字典来实现。而其字典数据结构是基于哈希表来实现的，其中一些特性的实现十分精妙。<br>​    源码分析是基于3.2版本的，相关数据结构定义在dict.h/dict.c中。</p>
 <p>###数据结构<br>在看具体的数据结构之前，首先我们来看一下redis里面字典整体的结构。<strong>dict</strong>就是整个字典的结构了，可以看到里面维护了一个指向<strong>dictType</strong>的成员，并且维护了一个有两个成员的数组，每个成员分别是一个<strong>dictht</strong>类型，这个便是哈希表的实现了。而每个哈希表类型里面又有一个数组，每个成员都是一个<strong>dictEntry</strong>类型。为什么设计的这么复杂呢？是因为这个哈希表结构提供了很多丰富的功能，具体提供了哪些功能呢？首先就需要看一下每个结构的定义。</p>
 <p><img src="/Users/apple/Desktop/整体结构.png" alt="整体结构"></p>
 <p>####节点数据结构<br>​    哈希表中的节点定义为dictEntry，维护了key-val的值，并且整个哈希表是基于开链法实现的，所以每个节点还需要维护一个指向下一个节点的指针next，如下是哈希节点的定义：</p>
@@ -355,8 +356,6 @@
 <p>迭代字典，搭配dictGetIterator或者dictGetSafeIterator操作，前面有说到安全迭代器和非安全迭代器的区别，非安全的迭代器在初次迭代的时候会计算一个哈希值，释放迭代器的时候assert这个哈希值是否被改变了。</p>
 <p>###总结<br>哈希表作为一种基础且重要的数据结构，很多开源项目都有自己的实现，而阅读redis中字典的实现的时候，会觉得很多地方的思考实在是有趣。包括它的一些特性，例如：动态扩容缩容，渐进式rehash等等，所有这些特性的出发点其实都是基于充分的使用内存。</p>
 
-          
-        
       
     </div>
     
@@ -373,12 +372,12 @@
       
 
       
+      
+      
 
       
 
       
-      
-        <div class="post-eof"></div>
       
     </footer>
   </div>
@@ -388,10 +387,11 @@
   </article>
 
 
-    
-  </section>
 
-  
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -399,6 +399,10 @@
 
 
           
+
+  
+
+
 
         </div>
         
@@ -599,6 +603,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
