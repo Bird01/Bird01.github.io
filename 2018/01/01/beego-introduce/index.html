@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="go,beego,web," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="引言&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;下半年一直在研究go语言，学习了go语言的语法，研究了go语言的一些底层机制，包括协程，调度，channel，类型系统等等。也使用go语言的web框架beego搭建了两个小型的web系统。之前一直做的是游戏后台，应用后台，很少接触web后台，这一次也算是对web后台做了一些深入的研究，包括RESTful api，http/https，cookie">
+<meta name="keywords" content="go,beego,web">
+<meta property="og:type" content="article">
+<meta property="og:title" content="go web编程之-beego框架">
+<meta property="og:url" content="http://yoursite.com/2018/01/01/beego-introduce/index.html">
+<meta property="og:site_name" content="Bird&#39;s Note">
+<meta property="og:description" content="引言&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;下半年一直在研究go语言，学习了go语言的语法，研究了go语言的一些底层机制，包括协程，调度，channel，类型系统等等。也使用go语言的web框架beego搭建了两个小型的web系统。之前一直做的是游戏后台，应用后台，很少接触web后台，这一次也算是对web后台做了一些深入的研究，包括RESTful api，http/https，cookie">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://yoursite.com/2018/01/01/beego-introduce/api.png">
+<meta property="og:image" content="http://yoursite.com/2018/01/01/beego-introduce/beego-dir.png">
+<meta property="og:image" content="http://yoursite.com/2018/01/01/beego-introduce/beego-run.png">
+<meta property="og:image" content="http://yoursite.com/2018/01/01/beego-introduce/beego-server.png">
+<meta property="og:updated_time" content="2018-01-10T02:29:51.525Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="go web编程之-beego框架">
+<meta name="twitter:description" content="引言&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;下半年一直在研究go语言，学习了go语言的语法，研究了go语言的一些底层机制，包括协程，调度，channel，类型系统等等。也使用go语言的web框架beego搭建了两个小型的web系统。之前一直做的是游戏后台，应用后台，很少接触web后台，这一次也算是对web后台做了一些深入的研究，包括RESTful api，http/https，cookie">
+<meta name="twitter:image" content="http://yoursite.com/2018/01/01/beego-introduce/api.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/01/01/beego-introduce/"/>
+
+
+
+
+
+  <title>go web编程之-beego框架 | Bird's Note</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Bird's Note</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/01/beego-introduce/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Bird">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/weizhuang.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Bird's Note">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">go web编程之-beego框架</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-01T10:00:00+08:00">
+                2018-01-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/go/" itemprop="url" rel="index">
+                    <span itemprop="name">go</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/01/01/beego-introduce/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2018/01/01/beego-introduce/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i> 浏览
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>&nbsp;&nbsp;&nbsp;&nbsp;下半年一直在研究go语言，学习了go语言的语法，研究了go语言的一些底层机制，包括协程，调度，channel，类型系统等等。也使用go语言的web框架beego搭建了两个小型的web系统。之前一直做的是游戏后台，应用后台，很少接触web后台，这一次也算是对web后台做了一些深入的研究，包括RESTful api，http/https，cookie/session，爬虫，登录系统，反向代理等等相关知识。项目代码大概码了千行，遗憾的是，项目没有过多的资源再深入进行下去。一切始于beego，所以觉得有必要对beego框架做一个总结，算是个人web开发技术栈上的一环。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;项目前期调研的时候，技术方向上选择了go语言，最开始是准备自己来实现一个web后台，因为go语言本身提供了很多丰富的http库，可以很方便的构建web服务，但是实现的过程中发现了很多的阻力。项目组同事开会讨论的时候都觉得还是使用一个开源框架好一点，避免踩坑。于是开始调研go语言的一些web框架，包括gin，echo，beego等等，考虑到gin和echo这一类的过于轻量，我们也没有太多的web开发的经验，而beego的思想源于python的django和flask，后面两个我之前有一定了解，所以选定了beego，实时证明beego的简洁，文档的完善，社区的活跃，使我们做到了快速的迭代。</p>
+<h2 id="beego的使用"><a href="#beego的使用" class="headerlink" title="beego的使用"></a>beego的使用</h2><p>&nbsp;&nbsp;&nbsp;&nbsp;beego是国人开发的，作者是astaxie，目前的版本是1.9.1，官方文档在<a href="https://beego.me" target="_blank" rel="noopener">beego.me</a>。beego本身是一个MVC模式的框架，所以可以使用它来构建MVC模式的web服务，也可以使用它来构建RESTful的纯API服务。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;要使用beego框架，首先要有一套标准的go开发环境，这里就不介绍了，具体可以看go语言<a href="https://golang.org/doc/install" target="_blank" rel="noopener">官网文档</a>，有了go开发环境，我们就可以开始安装beego的开发环境了。</p>
+<h3 id="beego框架和bee工具"><a href="#beego框架和bee工具" class="headerlink" title="beego框架和bee工具"></a>beego框架和bee工具</h3><p>首先在src目录下面，执行如下的命令，拉取beego框架和bee工具</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ go get github.com/astaxie/beego</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ go get github.com/beego/bee</span><br></pre></td></tr></table></figure>
+<p>bee会安装到#GOPATH/bin下面，所以需要将#GOPATH/bin目录加入环境变量中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ export PATH=$PATH:$(go env GOPATH)/bin</span><br></pre></td></tr></table></figure>
+<h3 id="创建服务"><a href="#创建服务" class="headerlink" title="创建服务"></a>创建服务</h3><p>创建beego项目，使用bee命令即可，前面我们说到beego可以创建两种服务，都集成在bee命令中：</p>
+<p>bee new webproject 创建一个MVC框架的项目</p>
+<p>bee api apiproject 创建一个Restful api项目</p>
+<p>因为我的项目都是纯api的服务，所以我也以创建api服务举例子，比如这里我创建一个api的项目</p>
+<p><img src="api.png" alt=""></p>
+<p>beego框架会自动帮我们生成相关的模块，beego创建的模块目录如下</p>
+<p><img src="beego-dir.png" alt=""></p>
+<h3 id="运行服务"><a href="#运行服务" class="headerlink" title="运行服务"></a>运行服务</h3><p>要运行创建的beego项目，只需要执行bee run，将会得到如下的提示信息</p>
+<p><img src="beego-run.png" alt=""></p>
+<h3 id="访问服务"><a href="#访问服务" class="headerlink" title="访问服务"></a>访问服务</h3><p>访问ip:8080端口便可以看到beego服务已经启动起来了</p>
+<p><img src="beego-server.png" alt=""></p>
+<p>可以看到，使用beego框架创建http服务过程非常简单，接下来我们就可以完善我们的功能了。</p>
+<h2 id="框架分析"><a href="#框架分析" class="headerlink" title="框架分析"></a>框架分析</h2><p>虽然MVC架构中有Model(模式)-View(视图)-Controller(控制器)，在一个提供api的服务中也可以抽象出模式和控制器，只是没有视图罢了。</p>
+<h3 id="controller"><a href="#controller" class="headerlink" title="controller"></a>controller</h3><p>beego最核心的概念就是控制器了，要使用控制器，首先我们要定义自己的控制器struct，使用bee api命令创建的模板已经定义好了两个controler，ObjectController和UserController。他们匿名组合了beego.Controller，这样就可以使用beego.Controller定义的一些接口，比如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Prepare()</span><br></pre></td></tr></table></figure></p>
+<p>这个函数会在下面定义的这些 Method 方法之前执行，用户可以重写这个函数实现类似用户验证之类。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Get()，Post()，Delete()，Put()，Head()</span><br></pre></td></tr></table></figure>
+<p>如果用户请求的 HTTP Method 是其中的一种，那么就执行该函数，用户继承的子 struct 中可以实现了该方法以处理这个请求。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Finish()</span><br></pre></td></tr></table></figure>
+<p>这个函数是在执行完相应的 HTTP Method 方法之后执行的，默认是空，用户可以在子 struct 中重写这个函数，执行例如数据库关闭，清理数据之类的工作。</p>
+<p>当然我们的控制器也可以自己定义一些接口，那么最核心的问题是这些接口怎么对外提供服务呢？这就需要路由的功能了。</p>
+<h3 id="路由设置"><a href="#路由设置" class="headerlink" title="路由设置"></a>路由设置</h3><p>我认为beego的灵活性的一个特点，在于它提供了强大的路由功能，包括后面要讲到的自动API文档的功能，让我这种之前很少接触web后台开发的人来说，虎躯一震。。。</p>
+<h4 id="固定路由"><a href="#固定路由" class="headerlink" title="固定路由"></a>固定路由</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">beego.Router(&quot;/&quot;, &amp;controllers.MainController&#123;&#125;)</span><br><span class="line">beego.Router(&quot;/admin&quot;, &amp;admin.UserController&#123;&#125;)</span><br><span class="line">beego.Router(&quot;/admin/index&quot;, &amp;admin.ArticleController&#123;&#125;)</span><br><span class="line">beego.Router(&quot;/admin/addpkg&quot;, &amp;admin.AddController&#123;&#125;)</span><br></pre></td></tr></table></figure>
+<p>这种是最常用也是最简单的了，一个路由，一个控制器，根据请求的方法get, post, head路由到特定的函数,Get(),Post(),Head()等等</p>
+<h4 id="自定义方法及RESTful路由"><a href="#自定义方法及RESTful路由" class="headerlink" title="自定义方法及RESTful路由"></a>自定义方法及RESTful路由</h4><p>固定路由不够灵活，controller里面必须要以特定的方法作为函数名。beego提供了更加灵活的方式，用户可以自定义函数名，然后使用如下的方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">beego.Router(&quot;/&quot;,&amp;IndexController&#123;&#125;,&quot;method:funcname&quot;)</span><br></pre></td></tr></table></figure>
+<p>多个Method对应一个函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">beego.Router(&quot;/api&quot;,&amp;RestController&#123;&#125;,&quot;get,post:ApiFunc&quot;)</span><br></pre></td></tr></table></figure>
+<p>多个Method对应不同函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">beego.Router(&quot;/simple&quot;,&amp;SimpleController&#123;&#125;,&quot;get:GetFunc;post:PostFunc&quot;)</span><br></pre></td></tr></table></figure>
+<p>是不是很非常6。。。</p>
+<h4 id="正则路由"><a href="#正则路由" class="headerlink" title="正则路由"></a>正则路由</h4><p>beego还提供了正则路由</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">beego.Router(“/api/:id”, &amp;controllers.RController&#123;&#125;)</span><br><span class="line">beego.Router(“/:id:int”, &amp;controllers.RController&#123;&#125;)</span><br><span class="line">beego.Router(“/:id:string”, &amp;controllers.RController&#123;&#125;)</span><br></pre></td></tr></table></figure>
+<p>当然我认为不要过多的依赖这种方式，毕竟路由里面加上正则很容易乱，不好维护</p>
+<h4 id="注解路由"><a href="#注解路由" class="headerlink" title="注解路由"></a>注解路由</h4><p>除了上面说的几种路由，beego还提供了更强大的注解路由，注解路由是指，用户不需要注册路由了，只需要在router.go中Include相应地controller，然后在controller的method方法上面写上路由注释就可以了。 注解路由最强大的地方在于可以结合swagger做API文档自动化，非常方便，后面我会详细介绍。</p>
+<h3 id="数据处理"><a href="#数据处理" class="headerlink" title="数据处理"></a>数据处理</h3><p>路由注册之后，拿到请求的数据，该如何处理呢？beego提供了一组api可以获取http请求的数据</p>
+<h4 id="获取query参数"><a href="#获取query参数" class="headerlink" title="获取query参数"></a>获取query参数</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">GetString(key string) string</span><br><span class="line">GetStrings(key string) []string</span><br><span class="line">GetInt(key string) (int64, error)</span><br><span class="line">GetBool(key string) (bool, error)</span><br><span class="line">GetFloat(key string) (float64, error)</span><br></pre></td></tr></table></figure>
+<h4 id="获取正则变量"><a href="#获取正则变量" class="headerlink" title="获取正则变量"></a>获取正则变量</h4><p>这种对应于前面的正则路由</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">this.Ctx.Input.Param(&quot;:id&quot;)</span><br></pre></td></tr></table></figure>
+<h4 id="获取json数据"><a href="#获取json数据" class="headerlink" title="获取json数据"></a>获取json数据</h4><p>有的时候，我们会把请求的json数据放到Request Body，该如何将这个json数据解析到对应的struct中呢？</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">var ob models.Object</span><br><span class="line">json.Unmarshal(this.Ctx.Input.RequestBody, &amp;ob)</span><br></pre></td></tr></table></figure>
+<h4 id="获取form数据"><a href="#获取form数据" class="headerlink" title="获取form数据"></a>获取form数据</h4><p>也可以使用struct的tag来直接解析表单的数据，例如，我们定义一个表单<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">form</span> <span class="attr">id</span>=<span class="string">"user"</span>&gt;</span></span><br><span class="line">    名字：<span class="tag">&lt;<span class="name">input</span> <span class="attr">name</span>=<span class="string">"username"</span> <span class="attr">type</span>=<span class="string">"text"</span> /&gt;</span></span><br><span class="line">    年龄：<span class="tag">&lt;<span class="name">input</span> <span class="attr">name</span>=<span class="string">"age"</span> <span class="attr">type</span>=<span class="string">"text"</span> /&gt;</span></span><br><span class="line">    邮箱：<span class="tag">&lt;<span class="name">input</span> <span class="attr">name</span>=<span class="string">"Email"</span> <span class="attr">type</span>=<span class="string">"text"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"submit"</span> <span class="attr">value</span>=<span class="string">"提交"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>然后定义一个struct<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> user <span class="keyword">struct</span> &#123; </span><br><span class="line">    Id    <span class="keyword">int</span>         <span class="string">`form:"-"`</span> </span><br><span class="line">    Name  <span class="keyword">interface</span>&#123;&#125; <span class="string">`form:"username"`</span> </span><br><span class="line">    Age   <span class="keyword">int</span>         <span class="string">`form:"age"`</span></span><br><span class="line">    Email <span class="keyword">string</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>最后进行解析<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(this *MainController)</span> <span class="title">Post</span><span class="params">()</span></span> &#123;</span><br><span class="line">    u := user&#123;&#125;</span><br><span class="line">    <span class="keyword">if</span> err := this.ParseForm(&amp;u); err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="comment">//handle error</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="日志模块"><a href="#日志模块" class="headerlink" title="日志模块"></a>日志模块</h3><p>beego的日志模块也非常的好用，只需要</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"github.com/astaxie/beego/logs"</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">logs.SetLogger(<span class="string">"console"</span>) #打印日志信息到console</span><br><span class="line">beego.SetLogger(<span class="string">"file"</span>, <span class="string">`&#123;"filename":"logs/app.log"&#125;`</span>)  #打印日志信息到文件</span><br><span class="line">beego.SetLevel(loglevel) #设置日志的级别，<span class="number">1</span><span class="number">-7</span>,<span class="number">7</span>表示trace级别</span><br><span class="line">beego.SetLogFuncCall(<span class="literal">true</span>) #输出文件名和行号</span><br><span class="line">beego.Debug，beego.Info，beego.Fatal #调用相应的日志函数了</span><br></pre></td></tr></table></figure>
+<h3 id="开启https"><a href="#开启https" class="headerlink" title="开启https"></a>开启https</h3><p>web服务器必须要考虑安全问题，要使用beego提供的https功能，只需要在app.conf中做如下的配置即可，其中的公钥和证书需要自己生成</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">enablehttptls=<span class="literal">true</span></span><br><span class="line">httpsport=<span class="number">8080</span></span><br><span class="line">httpscertfile=tls1/server.crt</span><br><span class="line">httpskeyfile=tls1/server.key</span><br></pre></td></tr></table></figure>
+<h3 id="文档自动化"><a href="#文档自动化" class="headerlink" title="文档自动化"></a>文档自动化</h3><p>web开发从早期的MVC模式渐渐发展到现在的前后端分离模式，前台和后台只干自己的事情，这样可以大大提高开发的效率，后台只提供RESTful的接口，前端负责展示的逻辑，这其中有一个问题就是接口联调的时候该如何约定？swagger应运而生。通过swagger-ui定义接口，前后端可以不依赖于部署的服务，灵活的调试接口。而beego则整合了swagger的功能，可以方便的自动生成swagger描述语言。</p>
+<h4 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h4><p>首先必须要在router.go中开头加上如下的注释</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// @APIVersion 1.0.0</span></span><br><span class="line"><span class="comment">// @Title beego Test API</span></span><br><span class="line"><span class="comment">// @Description beego has a very cool tools to autogenerate documents for your API</span></span><br><span class="line"><span class="comment">// @Contact astaxie@gmail.com</span></span><br><span class="line"><span class="comment">// @TermsOfServiceUrl http://beego.me/</span></span><br><span class="line"><span class="comment">// @License Apache 2.0</span></span><br><span class="line"><span class="comment">// @LicenseUrl http://www.apache.org/licenses/LICENSE-2.0.html</span></span><br></pre></td></tr></table></figure>
+<p>然后在main.go中写一个如下的配置</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> beego.BConfig.RunMode == <span class="string">"dev"</span> &#123;</span><br><span class="line">        beego.BConfig.WebConfig.DirectoryIndex = <span class="literal">true</span></span><br><span class="line">        beego.BConfig.WebConfig.StaticDir[<span class="string">"/swagger"</span>] = <span class="string">"swagger"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="路由设置-1"><a href="#路由设置-1" class="headerlink" title="路由设置"></a>路由设置</h4><p>目前beego集成swagger只支持namespace+Include的路由写法</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">init</span><span class="params">()</span></span> &#123;</span><br><span class="line">	ns :=</span><br><span class="line">        beego.NewNamespace(<span class="string">"/api"</span>,</span><br><span class="line">            beego.NSNamespace(<span class="string">"/agentinfo"</span>,</span><br><span class="line">                beego.NSInclude(</span><br><span class="line">                    &amp;controllers.AgentController&#123;&#125;,</span><br><span class="line">                ),</span><br><span class="line">            ),</span><br><span class="line">        )</span><br><span class="line">    beego.AddNamespace(ns)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="应用注释"><a href="#应用注释" class="headerlink" title="应用注释"></a>应用注释</h4><p>比如我们提供了一个这样的接口，这里的lang是一个swagger路径参数，类型是string, agentinfo是一个dao.AddAgentInfo类型的对象</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// @Title AddAgentConfInfo</span></span><br><span class="line"><span class="comment">// @Description set the agent info</span></span><br><span class="line"><span class="comment">// @Param lang path string true "The lang"</span></span><br><span class="line"><span class="comment">// @Param agentinfo body dao.AddAgentInfo true "The json agentinfo"</span></span><br><span class="line"><span class="comment">// @Success 201 "Created"</span></span><br><span class="line"><span class="comment">// @Failure 403 "Forbidden"</span></span><br><span class="line"><span class="comment">// @router /:lang [Post]</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(this *AgentController)</span> <span class="title">AddAgentConfInfo</span><span class="params">()</span></span> &#123;</span><br><span class="line"></span><br><span class="line">    lang := this.Ctx.Input.Param(<span class="string">":lang"</span>)</span><br><span class="line">    beego.Info(<span class="string">"AddAgentConfInfo, lang:"</span>, lang)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> agentinfo dao.AddAgentInfo</span><br><span class="line">    json.Unmarshal([]<span class="keyword">byte</span>(this.Ctx.Input.RequestBody), &amp;agentinfo)</span><br><span class="line">    beego.Info(<span class="string">"AddAgentConfInfo, agentinfo:"</span>, agentinfo)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后执行，bee run -gendoc=true -downdoc=true，gendoc表示根据注释生成新的swagger文档，downdoc表示下载swagger相关的组件</p>
+<h4 id="跨域问题"><a href="#跨域问题" class="headerlink" title="跨域问题"></a>跨域问题</h4><p>客户端调试的时候可能会遇到跨域访问的问题，服务器需要支持，搜索并测试了好久，目前我的做法是在router.go开头加上</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">beego.InsertFilter(<span class="string">"*"</span>, beego.BeforeRouter, cors.Allow(&amp;cors.Options&#123;</span><br><span class="line">    AllowOrigins: []<span class="keyword">string</span>&#123;<span class="string">"*"</span>&#125;,</span><br><span class="line">    <span class="comment">//AllowAllOrigins:  true,</span></span><br><span class="line">    AllowMethods:     []<span class="keyword">string</span>&#123;<span class="string">"GET"</span>, <span class="string">"POST"</span>, <span class="string">"PUT"</span>, <span class="string">"DELETE"</span>, <span class="string">"OPTIONS"</span>&#125;,</span><br><span class="line">    AllowHeaders:     []<span class="keyword">string</span>&#123;<span class="string">"Origin"</span>, <span class="string">"Authorization"</span>, <span class="string">"Access-Control-Allow-Origin"</span>, <span class="string">"Access-Control-Allow-Headers"</span>, <span class="string">"Content-Type"</span>, <span class="string">"X-Pingother"</span>, <span class="string">"X-Requested-With"</span>&#125;,</span><br><span class="line">    ExposeHeaders:    []<span class="keyword">string</span>&#123;<span class="string">"Content-Length"</span>, <span class="string">"Access-Control-Allow-Origin"</span>, <span class="string">"Access-Control-Allow-Headers"</span>, <span class="string">"Content-Type"</span>&#125;,</span><br><span class="line">    AllowCredentials: <span class="literal">true</span>,</span><br><span class="line">    &#125;))</span><br></pre></td></tr></table></figure>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>至此，beego框架算是做了一个完整的简介了，beego给我的感觉就是智能，简便，符合go的设计思想。希望以后有机会能多深入的使用这个框架，并且贡献一些自己的代码。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/go/" rel="tag"># go</a>
+          
+            <a href="/tags/beego/" rel="tag"># beego</a>
+          
+            <a href="/tags/web/" rel="tag"># web</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/01/redis-dict/" rel="next" title="redis 字典的实现">
+                <i class="fa fa-chevron-left"></i> redis 字典的实现
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/weizhuang.png"
+                alt="Bird" />
+            
+              <p class="site-author-name" itemprop="name">Bird</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/bird01" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/rickpen" target="_blank" title="ZhiHu">
+                      
+                        <i class="fa fa-fw fa-zhihu"></i>ZhiHu</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#beego的使用"><span class="nav-number">2.</span> <span class="nav-text">beego的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#beego框架和bee工具"><span class="nav-number">2.1.</span> <span class="nav-text">beego框架和bee工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建服务"><span class="nav-number">2.2.</span> <span class="nav-text">创建服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#运行服务"><span class="nav-number">2.3.</span> <span class="nav-text">运行服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#访问服务"><span class="nav-number">2.4.</span> <span class="nav-text">访问服务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#框架分析"><span class="nav-number">3.</span> <span class="nav-text">框架分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#controller"><span class="nav-number">3.1.</span> <span class="nav-text">controller</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#路由设置"><span class="nav-number">3.2.</span> <span class="nav-text">路由设置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#固定路由"><span class="nav-number">3.2.1.</span> <span class="nav-text">固定路由</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#自定义方法及RESTful路由"><span class="nav-number">3.2.2.</span> <span class="nav-text">自定义方法及RESTful路由</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#正则路由"><span class="nav-number">3.2.3.</span> <span class="nav-text">正则路由</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#注解路由"><span class="nav-number">3.2.4.</span> <span class="nav-text">注解路由</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据处理"><span class="nav-number">3.3.</span> <span class="nav-text">数据处理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#获取query参数"><span class="nav-number">3.3.1.</span> <span class="nav-text">获取query参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#获取正则变量"><span class="nav-number">3.3.2.</span> <span class="nav-text">获取正则变量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#获取json数据"><span class="nav-number">3.3.3.</span> <span class="nav-text">获取json数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#获取form数据"><span class="nav-number">3.3.4.</span> <span class="nav-text">获取form数据</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#日志模块"><span class="nav-number">3.4.</span> <span class="nav-text">日志模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#开启https"><span class="nav-number">3.5.</span> <span class="nav-text">开启https</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文档自动化"><span class="nav-number">3.6.</span> <span class="nav-text">文档自动化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#配置"><span class="nav-number">3.6.1.</span> <span class="nav-text">配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#路由设置-1"><span class="nav-number">3.6.2.</span> <span class="nav-text">路由设置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#应用注释"><span class="nav-number">3.6.3.</span> <span class="nav-text">应用注释</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#跨域问题"><span class="nav-number">3.6.4.</span> <span class="nav-text">跨域问题</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Bird</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i> 访问人数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i> 访问总量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+      <style>
+        a.gitment-editor-footer-tip { display: none; }
+        .gitment-container.gitment-footer-container { display: none; }
+      </style>
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'bird01',
+            repo: 'bird01.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: 'd7ba11b0aafd99a7b0efc2027f10be4486acd2f1',
+            
+                client_id: '10218a6dad95daf2bcb0'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
